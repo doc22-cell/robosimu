@@ -2,8 +2,6 @@ name: Add FANUC meshes
 
 on:
   push:
-    paths:
-      - .github/workflows/add-fanuc-meshes.yml
   workflow_dispatch:
 
 permissions:

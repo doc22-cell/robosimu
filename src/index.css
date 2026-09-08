@@ -1,5 +1,718 @@
-html, body, #root {
+/* ============================================================
+   ROBOT SIMULATOR UI
+   UI ONLY — DO NOT CHANGE APP.JSX
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
   margin: 0;
-  min-height: 100%;
   width: 100%;
+  min-height: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  background: #f4f8fc;
+  color: #29425e;
+}
+
+/* ============================================================
+   APP
+   ============================================================ */
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  background: #f4f8fc;
+}
+
+/* ============================================================
+   SIDEBAR
+   Keep it, but make it clean like the reference UI
+   ============================================================ */
+
+.sidebar {
+  width: 235px;
+  min-width: 235px;
+  min-height: 100vh;
+
+  background: #ffffff;
+
+  border-right: 1px solid #e2eaf2;
+
+  padding: 24px 16px;
+
+  color: #49647f;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 8px 10px 28px;
+
+  border-bottom: 1px solid #edf2f7;
+
+  margin-bottom: 20px;
+}
+
+.logo:first-letter {
+  font-size: 28px;
+}
+
+.logo strong {
+  display: block;
+
+  color: #23425f;
+
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.logo span {
+  display: block;
+
+  margin-top: 4px;
+
+  color: #8a9bad;
+
+  font-size: 12px;
+}
+
+/* Sidebar buttons */
+
+.sidebar button {
+  width: 100%;
+
+  height: 46px;
+
+  margin-bottom: 7px;
+
+  padding: 0 14px;
+
+  border: none;
+  border-radius: 9px;
+
+  background: transparent;
+
+  color: #58718b;
+
+  font-size: 14px;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition: 0.15s;
+}
+
+.sidebar button:hover {
+  background: #edf5fc;
+  color: #2874bd;
+}
+
+.sidebar button.active {
+  background: #e7f2ff;
+
+  color: #287bd0;
+
+  font-weight: 700;
+}
+
+/* ============================================================
+   MAIN
+   ============================================================ */
+
+.main {
+  flex: 1;
+
+  min-width: 0;
+
+  padding: 0 24px 25px;
+
+  background: #f4f8fc;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.header {
+  height: 86px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 8px;
+
+  border-bottom: 1px solid #e4ebf2;
+}
+
+.header h1 {
+  margin: 0;
+
+  color: #243f5b;
+
+  font-size: 25px;
+  font-weight: 700;
+}
+
+.header p {
+  margin: 6px 0 0;
+
+  color: #8395a8;
+
+  font-size: 14px;
+}
+
+.connection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: #20a875;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+
+  border-radius: 50%;
+
+  background: #27c995;
+
+  box-shadow:
+    0 0 0 4px rgba(39, 201, 149, 0.12);
+}
+
+/* ============================================================
+   CONTENT
+   ============================================================ */
+
+.content {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1.3fr)
+    minmax(420px, 0.95fr);
+
+  gap: 18px;
+
+  margin-top: 20px;
+
+  align-items: start;
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+
+.card {
+  background: #ffffff;
+
+  border: 1px solid #e0e9f2;
+
+  border-radius: 16px;
+
+  box-shadow:
+    0 4px 16px rgba(40, 75, 110, 0.06);
+
+  overflow: hidden;
+}
+
+/* ============================================================
+   CARD HEADER
+   ============================================================ */
+
+.card-header {
+  min-height: 76px;
+
+  padding: 18px 22px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border-bottom: 1px solid #edf2f6;
+}
+
+.card-header h2 {
+  margin: 0;
+
+  color: #294766;
+
+  font-size: 21px;
+  font-weight: 700;
+}
+
+.card-header button {
+  width: 42px;
+  height: 42px;
+
+  border: 1px solid #dce7f1;
+
+  border-radius: 9px;
+
+  background: #f7fbff;
+
+  color: #55718d;
+
+  font-size: 20px;
+
+  cursor: pointer;
+}
+
+/* Manual mode select */
+
+.card-header select {
+  height: 42px;
+
+  padding: 0 12px;
+
+  border: 1px solid #cfe0ef;
+
+  border-radius: 9px;
+
+  background: #edf6ff;
+
+  color: #316b9f;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  outline: none;
+}
+
+/* ============================================================
+   3D ENVIRONMENT
+   ============================================================ */
+
+.environment {
+  min-height: 680px;
+}
+
+.canvas-container {
+  height: 600px;
+
+  margin: 14px;
+
+  overflow: hidden;
+
+  border: 1px solid #e1e9f1;
+
+  border-radius: 13px;
+
+  background: #f7faff;
+
+  position: relative;
+}
+
+.canvas-container canvas {
+  display: block;
+
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ============================================================
+   CONTROL CARD
+   ============================================================ */
+
+.controls {
+  min-height: 680px;
+}
+
+/* ============================================================
+   CONTROL SECTIONS
+   ============================================================ */
+
+.control-section {
+  padding: 21px 22px;
+
+  border-bottom: 1px solid #edf2f6;
+}
+
+.control-section h3 {
+  margin: 0 0 15px;
+
+  color: #34516e;
+
+  font-size: 17px;
+  font-weight: 700;
+}
+
+/* ============================================================
+   BUTTON GRID
+   ============================================================ */
+
+.button-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(6, minmax(0, 1fr));
+
+  gap: 9px;
+}
+
+.button-grid button {
+  width: 100%;
+  height: 53px;
+
+  border-radius: 10px;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.1s,
+    filter 0.15s;
+}
+
+.button-grid button:hover {
+  filter: brightness(0.97);
+}
+
+.button-grid button:active {
+  transform: translateY(2px);
+}
+
+/* ============================================================
+   CARTESIAN BUTTONS
+   ============================================================ */
+
+.button-grid .x {
+  background: #ffe1e1;
+
+  border: 1px solid #ffd0d0;
+
+  color: #dc3636;
+}
+
+.button-grid .y {
+  background: #def4e8;
+
+  border: 1px solid #c9ead8;
+
+  color: #159153;
+}
+
+.button-grid .z {
+  background: #dfeeff;
+
+  border: 1px solid #cce0fa;
+
+  color: #2569c7;
+}
+
+/* ============================================================
+   ROTATIONAL BUTTONS
+   ============================================================ */
+
+.button-grid .rx,
+.button-grid .ry,
+.button-grid .rz {
+  background: #eee6ff;
+
+  border: 1px solid #dfd3ff;
+
+  color: #713dd9;
+}
+
+/* ============================================================
+   JOINT BUTTONS
+   ============================================================ */
+
+.button-grid .joint {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 53px;
+
+  padding: 10px 8px;
+
+  color: #ffffff !important;
+
+  -webkit-text-fill-color: #ffffff !important;
+
+  background: #263b52 !important;
+
+  border: 1px solid #263b52 !important;
+
+  border-radius: 9px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  line-height: 1;
+
+  opacity: 1 !important;
+  visibility: visible !important;
+
+  cursor: pointer;
+}
+
+.button-grid .joint:hover {
+  background: #314b64 !important;
+}
+
+.button-grid .joint:active {
+  background: #1d2e41 !important;
+
+  transform: translateY(1px);
+}
+
+/* ============================================================
+   SETTINGS
+   ============================================================ */
+
+.settings-row {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 25px;
+
+  padding: 22px;
+}
+
+.settings-row label {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #617b95;
+
+  font-size: 14px;
+}
+
+.settings-row select {
+  width: 100%;
+
+  height: 45px;
+
+  padding: 0 12px;
+
+  border: 1px solid #d1e0ed;
+
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  color: #425d77;
+
+  font-size: 14px;
+}
+
+.speed {
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+}
+
+.speed input {
+  width: 100%;
+
+  accent-color: #65a9e5;
+
+  cursor: pointer;
+}
+
+.speed span {
+  display: block;
+
+  margin-top: 4px;
+
+  color: #72889d;
+
+  font-size: 12px;
+
+  text-align: right;
+}
+
+/* ============================================================
+   CURRENT POSE
+   ============================================================ */
+
+.pose {
+  margin-top: 18px;
+
+  padding: 20px 22px;
+}
+
+.pose h2 {
+  margin: 0 0 16px;
+
+  color: #294766;
+
+  font-size: 19px;
+}
+
+.pose-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(6, 1fr);
+
+  gap: 10px;
+}
+
+.pose-grid > div {
+  padding: 14px;
+
+  background: #f7faff;
+
+  border: 1px solid #e3ebf3;
+
+  border-radius: 9px;
+}
+
+.pose-grid span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #8094a8;
+
+  font-size: 12px;
+}
+
+.pose-grid strong {
+  color: #304c68;
+
+  font-size: 17px;
+}
+
+.pose-grid small {
+  margin-left: 3px;
+
+  color: #8799aa;
+
+  font-size: 11px;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+.main footer {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 18px 3px 0;
+
+  color: #7b8ea2;
+
+  font-size: 13px;
+}
+
+.main footer strong {
+  color: #506a82;
+}
+
+.main footer .ros {
+  color: #1aa876;
+
+  font-weight: 600;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1250px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .environment {
+    min-height: auto;
+  }
+
+  .controls {
+    min-height: auto;
+  }
+
+  .canvas-container {
+    height: 520px;
+  }
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    width: 190px;
+    min-width: 190px;
+  }
+
+  .main {
+    padding: 0 15px 20px;
+  }
+
+  .button-grid {
+    grid-template-columns:
+      repeat(3, 1fr);
+  }
+
+  .pose-grid {
+    grid-template-columns:
+      repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 650px) {
+  .app {
+    display: block;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .main {
+    padding: 0 10px 20px;
+  }
+
+  .header {
+    height: 75px;
+  }
+
+  .header h1 {
+    font-size: 20px;
+  }
+
+  .content {
+    margin-top: 12px;
+  }
+
+  .button-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+  .pose-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+  .canvas-container {
+    height: 420px;
+  }
 }

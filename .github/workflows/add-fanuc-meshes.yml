@@ -1,0 +1,38 @@
+name: Add FANUC meshes
+
+on:
+  push:
+    paths:
+      - .github/workflows/add-fanuc-meshes.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  add-meshes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download FANUC LR Mate 200iD medium-resolution meshes
+        run: |
+          mkdir -p public/fanuc/meshes
+          base="https://raw.githubusercontent.com/mattj23/lrmate-200id/master/meshes/med-res"
+          curl -fL "$base/Base.STL" -o public/fanuc/meshes/base.stl
+          curl -fL "$base/J1.STL" -o public/fanuc/meshes/j1.stl
+          curl -fL "$base/J2.STL" -o public/fanuc/meshes/j2.stl
+          curl -fL "$base/J3.STL" -o public/fanuc/meshes/j3.stl
+          curl -fL "$base/J4.STL" -o public/fanuc/meshes/j4.stl
+          curl -fL "$base/J5.STL" -o public/fanuc/meshes/j5.stl
+          curl -fL "$base/J6.STL" -o public/fanuc/meshes/j6.stl
+
+      - name: Commit meshes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/fanuc/meshes/*.stl
+          git diff --cached --quiet && exit 0
+          git commit -m "Add FANUC LR Mate 200iD meshes"
+          git push

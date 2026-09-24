@@ -782,6 +782,14 @@ const jogJoint = (
 
   useEffect(() => {
     return () => {
+
+
+      // The program runner uses async/await + sleep(),
+      // The program runner uses async/await + sleep(), so no program timer is stored here.
+      programRunningRef.current = false;
+
+      // Clean up any active manual joint jog timers.
+
       jointAnimations.current.forEach((timer, index) => {
         if (timer) {
           clearInterval(timer);

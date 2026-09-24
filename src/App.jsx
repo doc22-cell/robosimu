@@ -1,10 +1,18 @@
+import { calculateFK } from "./kinematics/forwardKinematics";
+import { parseProgramLine } from "./kinematics/movjParser";
+import { inverseKinematics } from "./kinematics/inverseKinematics";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Grid } from "@react-three/drei";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
 import URDFLoader from "urdf-loader";
 import "./App.css";
+
+
+
+
+
 
 // ============================================================
 // 3D ENVIRONMENT
@@ -334,6 +342,21 @@ function App() {
       0,
     ]);
 
+  // Program Editor text
+  const [programCode, setProgramCode] =
+    useState(`# Robot program
+# Add your code here...
+
+
+
+
+
+
+
+
+
+`);
+
   // ==========================================================
   // CARTESIAN / ROTATIONAL JOG
   // ==========================================================
@@ -448,67 +471,325 @@ function App() {
   // JOINT JOG
   // ============================================================
 
-  const jogJoint = (
-    jointIndex,
-    direction
-  ) => {
-    const angleChangeDeg =
-      stepSize * direction;
+  // ============================================================
+// SMOOTH JOINT JOG
+// ============================================================
+// The requested movement is divided into 1-degree steps.
+//
+// Example:
+// 0° → 1° → 2° → 3° → ... → 30°
+//
+// Speed controls the delay between each 1-degree step.
+// ============================================================
 
-    const angleChange =
-      THREE.MathUtils.degToRad(
-        angleChangeDeg
+const jointAnimations = useRef(
+  Array(6).fill(null)
+);
+
+const jogJoint = (
+  jointIndex,
+  direction
+) => {
+  const [minDeg, maxDeg] =
+    jointLimits[jointIndex];
+
+  // Current joint angle in degrees
+  const currentAngleDeg =
+    THREE.MathUtils.radToDeg(
+      jointAngles[jointIndex]
+    );
+
+  // Target is one Step Size away
+  const targetAngleDeg =
+    THREE.MathUtils.clamp(
+      currentAngleDeg +
+        stepSize * direction,
+      minDeg,
+      maxDeg
+    );
+
+  // If already at the limit, do nothing.
+  if (
+    targetAngleDeg ===
+    currentAngleDeg
+  ) {
+    console.log(
+      `J${jointIndex + 1}: joint limit reached`
+    );
+    return;
+  }
+
+  // Cancel an existing animation on this joint.
+  if (
+    jointAnimations.current[
+      jointIndex
+    ]
+  ) {
+    clearInterval(
+      jointAnimations.current[
+        jointIndex
+      ]
+    );
+  }
+
+  // Direction of each 1-degree movement.
+  const stepDirection =
+    targetAngleDeg >
+    currentAngleDeg
+      ? 1
+      : -1;
+
+  // Slower, smoother movement.
+  //
+  // Speed 0   → 140 ms per degree
+  // Speed 50  → 90 ms per degree
+  // Speed 100 → 40 ms per degree
+  //
+  const stepDelay =
+    Math.max(
+      40,
+      140 - speed
+    );
+
+  let nextAngle =
+    currentAngleDeg;
+
+  console.log(
+    `J${jointIndex + 1} moving:`,
+    `${currentAngleDeg.toFixed(0)}° → ${targetAngleDeg.toFixed(0)}°`
+  );
+
+  const timer =
+    setInterval(() => {
+      nextAngle +=
+        stepDirection;
+
+      // Do not go beyond the requested target.
+      if (
+        stepDirection > 0 &&
+        nextAngle >
+          targetAngleDeg
+      ) {
+        nextAngle =
+          targetAngleDeg;
+      }
+
+      if (
+        stepDirection < 0 &&
+        nextAngle <
+          targetAngleDeg
+      ) {
+        nextAngle =
+          targetAngleDeg;
+      }
+
+      const nextAngleRadians =
+        THREE.MathUtils.degToRad(
+          nextAngle
+        );
+
+      setJointAngles(
+        (previous) => {
+          const updated = [
+            ...previous,
+          ];
+
+          updated[jointIndex] =
+            nextAngleRadians;
+
+          jointAnglesRef.current = [...updated];
+
+          return updated;
+        }
       );
-
-    setJointAngles((prev) => {
-      const updated = [
-        ...prev,
-      ];
-
-      const [
-        minDeg,
-        maxDeg,
-      ] =
-        jointLimits[jointIndex];
-
-      const minRad =
-        THREE.MathUtils.degToRad(
-          minDeg
-        );
-
-      const maxRad =
-        THREE.MathUtils.degToRad(
-          maxDeg
-        );
-
-      const requested =
-        updated[jointIndex] +
-        angleChange;
-
-      const clamped =
-        THREE.MathUtils.clamp(
-          requested,
-          minRad,
-          maxRad
-        );
-
-      updated[jointIndex] =
-        clamped;
 
       console.log(
-        `J${jointIndex + 1}:`,
-        THREE.MathUtils
-          .radToDeg(clamped)
-          .toFixed(2),
-        "degrees",
-        clamped !== requested
-          ? "(limit reached)"
-          : ""
+        `J${jointIndex + 1}: ${nextAngle.toFixed(0)}°`
       );
 
-      return updated;
-    });
+      // Target reached.
+      if (
+        nextAngle ===
+        targetAngleDeg
+      ) {
+        clearInterval(timer);
+
+        jointAnimations.current[
+          jointIndex
+        ] = null;
+
+        console.log(
+          `J${jointIndex + 1} reached ${targetAngleDeg.toFixed(0)}°`
+        );
+      }
+    }, stepDelay);
+
+  jointAnimations.current[
+    jointIndex
+  ] = timer;
+};
+
+  // ============================================================
+  // SMOOTH MOVJ + SEQUENTIAL PROGRAM RUNNER
+  // ============================================================
+
+  const jointAnglesRef = useRef([0, 0, 0, 0, 0, 0]);
+  const programRunningRef = useRef(false);
+
+  const updateJointAngles = (angles) => {
+    jointAnglesRef.current = [...angles];
+    setJointAngles([...angles]);
   };
+
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const animateMOVJ = async (targetDegrees) => {
+    const currentDegrees = jointAnglesRef.current.map((angle) =>
+      THREE.MathUtils.radToDeg(angle)
+    );
+    const nextDegrees = [...currentDegrees];
+    const stepDelay = Math.max(40, 140 - speed);
+
+    console.log('MOVJ:', currentDegrees, '→', targetDegrees);
+
+    while (true) {
+      let finished = true;
+
+      for (let i = 0; i < 6; i++) {
+        const difference = targetDegrees[i] - nextDegrees[i];
+        if (Math.abs(difference) > 0.001) {
+          finished = false;
+          nextDegrees[i] += Math.sign(difference) * Math.min(1, Math.abs(difference));
+        }
+      }
+
+      updateJointAngles(
+        nextDegrees.map((angle) => THREE.MathUtils.degToRad(angle))
+      );
+
+      if (finished) break;
+      await sleep(stepDelay);
+    }
+
+    updateJointAngles(
+      targetDegrees.map((angle) => THREE.MathUtils.degToRad(angle))
+    );
+    console.log('MOVJ completed:', targetDegrees);
+  };
+
+  const runProgram = async () => {
+    if (programRunningRef.current) {
+      console.warn('Program is already running.');
+      return;
+    }
+
+    const commands = [];
+    const lines = programCode.split('\n');
+    let insideBlockComment = false;
+
+    lines.forEach((line, lineIndex) => {
+      let cleanedLine = line.trim();
+
+      if (insideBlockComment) {
+        if (cleanedLine.includes('*/')) {
+          insideBlockComment = false;
+          cleanedLine = cleanedLine.split('*/')[1].trim();
+        } else return;
+      }
+
+      if (cleanedLine.includes('/*')) {
+        const beforeComment = cleanedLine.split('/*')[0].trim();
+        const afterComment = cleanedLine.split('/*').slice(1).join('/*');
+        if (afterComment.includes('*/')) {
+          cleanedLine = beforeComment + ' ' + afterComment.split('*/').slice(1).join('*/').trim();
+        } else {
+          insideBlockComment = true;
+          cleanedLine = beforeComment;
+        }
+      }
+
+      cleanedLine = cleanedLine.split('#')[0].trim();
+      if (!cleanedLine) return;
+
+      try {
+        const command = parseProgramLine(cleanedLine);
+        if (command) commands.push({ command, lineIndex });
+      } catch (error) {
+        console.error(`Line ${lineIndex + 1}: ${error.message}`);
+      }
+    });
+
+    if (insideBlockComment) {
+      console.warn('Program contains an unclosed /* multi-line comment.');
+    }
+
+    if (commands.length === 0) {
+      console.warn('No valid HOME, MOVJ, or MOVL command found.');
+      return;
+    }
+
+    programRunningRef.current = true;
+    console.log('PROGRAM STARTED');
+
+    try {
+      for (const { command, lineIndex } of commands) {
+        console.log(`Executing line ${lineIndex + 1}:`, command.command);
+
+        if (command.command === 'HOME' || command.command === 'MOVJ') {
+          await animateMOVJ(command.joints);
+
+          const fk = calculateFK(command.joints);
+          console.log(`${command.command} completed from line ${lineIndex + 1}`);
+          console.log('FK transformation:');
+          console.table(fk.transformation);
+          console.log('FK end-effector position (mm):');
+          console.log(fk.position);
+        } else if (command.command === 'MOVL') {
+          console.log('Target position:', command.position);
+          console.log('Target orientation:', command.orientation);
+
+          const currentAngles = jointAnglesRef.current.map((angle) =>
+            THREE.MathUtils.radToDeg(angle)
+          );
+
+          const ikResult = inverseKinematics(
+            { x: command.position.x, y: command.position.y, z: command.position.z },
+            currentAngles
+          );
+
+          console.log('IK result:', ikResult);
+
+          if (ikResult.success) {
+            console.log('IK SUCCESS - Moving robot');
+            await animateMOVJ(ikResult.joints);
+            console.log('MOVL completed.');
+            console.log('Final IK position:', ikResult.position);
+            console.log('Position error:', ikResult.positionError, 'mm');
+          } else {
+            console.error('IK FAILED:', ikResult.message);
+            console.error('IK result:', ikResult);
+          }
+        }
+
+        console.log(`Line ${lineIndex + 1} completed.`);
+      }
+
+      console.log('PROGRAM COMPLETED');
+    } finally {
+      programRunningRef.current = false;
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      jointAnimations.current.forEach((timer, index) => {
+        if (timer) {
+          clearInterval(timer);
+          jointAnimations.current[index] = null;
+        }
+      });
+    };
+  }, []);
 
   // ============================================================
   // JSX
@@ -671,7 +952,11 @@ function App() {
       <button type="button">📄 New</button>
       <button type="button">📂 Open</button>
       <button type="button">💾 Save</button>
-      <button type="button" className="run-button">
+      <button
+        type="button"
+        className="run-button"
+        onClick={runProgram}
+      >
         ▶ Run
       </button>
     </div>
@@ -686,18 +971,8 @@ function App() {
 
     <textarea
       className="program-code"
-      defaultValue={`# Robot program
-# Add your code here...
-
-
-
-
-
-
-
-
-
-`}
+      value={programCode}
+      onChange={(e) => setProgramCode(e.target.value)}
       spellCheck="false"
     />
   </div>

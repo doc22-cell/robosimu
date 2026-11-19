@@ -18,6 +18,12 @@ I worked on the **motion logic and user interface**. In particular, I:
 - Integrated inverse-kinematics output into the interface so the joint angles corresponding to a requested tool pose could be displayed.
 - Iterated on the motion logic after observing jerky sequential joint movements during testing.
 
+## Demonstration
+
+A short screen recording of the simulator's robotic arm rotation has been prepared as `robotic hand rotation.mp4`. The recording is not yet hosted in this repository. Once uploaded to a GitHub issue, release, or repository asset, its public link can be embedded here.
+
+To reproduce the demonstration locally, install dependencies, run the Vite development server, and use the joint jogging controls in the simulator's 3D interface.
+
 ## Testing and iteration
 
 During simulator testing, I observed that the joints moved rapidly in sequence, producing a jerky-looking motion. I revised the motion logic and repeated the same command. The resulting arm movement appeared smoother on screen.

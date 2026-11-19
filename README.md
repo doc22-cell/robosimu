@@ -1,16 +1,48 @@
-# React + Vite
+# RoboSimu — FANUC Robot Arm Simulator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An interactive browser-based robotics simulation project focused on the FANUC LR Mate 200iD industrial robotic arm.
 
-Currently, two official plugins are available:
+## Overview
+RoboSimu combines a 3D robot visualization with joint controls and kinematics-related program logic. The application loads a URDF robot description and STL meshes and renders the model in a React interface.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Technology
+- React and Vite
+- JavaScript
+- Three.js, React Three Fiber, and Drei
+- URDF Loader and STL Loader
+- CSS
 
-## React Compiler
+## Implementation highlights
+- Interactive 3D scene with orbit camera controls and a reference grid.
+- FANUC LR Mate 200iD robot visualization from URDF and STL assets.
+- Six-joint angle updates for the robot model.
+- Separate modules for forward kinematics, inverse kinematics, and parsing robot motion instructions.
+- Browser-based interface for exploring robot control and motion.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Run locally
+```bash
+git clone https://github.com/doc22-cell/robosimu.git
+cd robosimu
+npm install
+npm run dev
+```
+Open the local address printed by Vite.
 
-## Expanding the ESLint configuration
+## Development commands
+```bash
+npm run build
+npm run lint
+npm run preview
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Project structure
+- `src/App.jsx`: 3D scene, URDF model loading, and interface integration
+- `src/App.css`: application styles
+- `src/kinematics/`: kinematics and robot program parsing modules
+- `public/`: static robot model assets (where present)
+
+## Scope and limitations
+This is a software simulation and educational development project, not a controller for a physical robot. The repository does not establish that machine learning or autonomous AI control is implemented. Verify numerical accuracy and robot safety constraints before applying the algorithms to hardware.
+
+## Author
+Mythreyan — [GitHub](https://github.com/doc22-cell)

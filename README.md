@@ -1,48 +1,76 @@
-# RoboSimu — FANUC Robot Arm Simulator
+# Six-Axis Robotic Arm Simulator — FANUC LR Mate 200iD
 
-An interactive browser-based robotics simulation project focused on the FANUC LR Mate 200iD industrial robotic arm.
+**Mythreyan I. S.** | B.Tech, Information and Communication Technology | SASTRA Deemed to be University
 
-## Overview
-RoboSimu combines a 3D robot visualization with joint controls and kinematics-related program logic. The application loads a URDF robot description and STL meshes and renders the model in a React interface.
+A browser-based interactive simulator for exploring the motion and control of a six-axis FANUC LR Mate 200iD robotic arm.
 
-## Technology
-- React and Vite
-- JavaScript
-- Three.js, React Three Fiber, and Drei
-- URDF Loader and STL Loader
-- CSS
+## Project overview
 
-## Implementation highlights
-- Interactive 3D scene with orbit camera controls and a reference grid.
-- FANUC LR Mate 200iD robot visualization from URDF and STL assets.
-- Six-joint angle updates for the robot model.
-- Separate modules for forward kinematics, inverse kinematics, and parsing robot motion instructions.
-- Browser-based interface for exploring robot control and motion.
+The simulator provides a 3D visualization of the robot and a control interface for exploring individual joint movement, target joint configurations, and straight-line tool motion. The project integrates robot kinematics calculations with interactive controls.
+
+## My contributions
+
+I worked on the **motion logic and user interface**. In particular, I:
+
+- Implemented and refined controls for jogging individual robot joints.
+- Worked on commanding the arm to a specified joint configuration.
+- Worked on straight-line tool movement commands.
+- Integrated inverse-kinematics output into the interface so the joint angles corresponding to a requested tool pose could be displayed.
+- Iterated on the motion logic after observing jerky sequential joint movements during testing.
+
+## Testing and iteration
+
+During simulator testing, I observed that the joints moved rapidly in sequence, producing a jerky-looking motion. I revised the motion logic and repeated the same command. The resulting arm movement appeared smoother on screen.
+
+**Important:** This was a *visual observation in the simulator*, not a quantitative benchmark of trajectory smoothness or physical robot performance.
+
+## Technology stack
+
+The checked-in application uses:
+
+- **React + Vite** for the user interface and development environment
+- **JavaScript and CSS** for interaction logic and styling
+- **Three.js / React Three Fiber / Drei** for 3D rendering and camera controls
+- **URDF Loader and STL Loader** for the FANUC robot description and mesh assets
+- **Kinematics modules** for forward/inverse kinematics and robot motion instruction parsing
 
 ## Run locally
+
+Prerequisite: install Node.js and npm.
+
 ```bash
 git clone https://github.com/doc22-cell/robosimu.git
 cd robosimu
 npm install
 npm run dev
 ```
-Open the local address printed by Vite.
 
-## Development commands
+Open the local URL printed in the terminal.
+
+For a production build:
+
 ```bash
 npm run build
-npm run lint
 npm run preview
 ```
 
-## Project structure
-- `src/App.jsx`: 3D scene, URDF model loading, and interface integration
-- `src/App.css`: application styles
-- `src/kinematics/`: kinematics and robot program parsing modules
-- `public/`: static robot model assets (where present)
+## Code organization
 
-## Scope and limitations
-This is a software simulation and educational development project, not a controller for a physical robot. The repository does not establish that machine learning or autonomous AI control is implemented. Verify numerical accuracy and robot safety constraints before applying the algorithms to hardware.
+- `src/App.jsx` — main simulator interface, 3D environment, robot model integration, and control logic
+- `src/App.css` — interface styling
+- `src/kinematics/` — kinematics and motion parsing logic
+- `public/` — robot assets used by the simulator
+
+## Project scope
+
+This is a software-based robotics simulation project. It does not claim autonomous AI control, verified real-world robot safety, or hardware deployment. Motion quality was assessed visually during the described testing iteration.
+
+## Project link
+
+[GitHub repository](https://github.com/doc22-cell/robosimu)
 
 ## Author
-Mythreyan — [GitHub](https://github.com/doc22-cell)
+
+**Mythreyan I. S.**  
+B.Tech in Information and Communication Technology  
+SASTRA Deemed to be University
